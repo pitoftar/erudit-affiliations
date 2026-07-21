@@ -1,5 +1,7 @@
+# préambule
 from pathlib import Path
 import pandas as pd
-p = Path.cwd
+import xml.etree.ElementTree as ET
+import csv
 
-print(p)
+# 
