@@ -26,6 +26,6 @@ xml_avec_notebio = []
 for chemin in chemins_xml_sans_affiliation:
     tree = ET.parse(chemin)
     article = tree.getroot()
-    notebios = article.findall("./partiesann/grnotebio/notebio/alinea")
-    print(notebios)
-
+    for child in article.iter():
+        if child.attrib:
+            print(f"Tag: {child.tag} | Attributes: {child.attrib}")
