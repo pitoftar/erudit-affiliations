@@ -14,8 +14,18 @@ affiliations_notesbio = pd.DataFrame(columns=["IDU de l'article", "IDau notebio"
 
 # ne considérer que les dossiers dont le nom se trouve dans la liste
 racine = Path("/home/adrien/Documents/erudit-affiliation-2025/xml_pour_notebio")
-chemins_xml_avec_notebio = [
+chemins_xml_sans_affiliation = [
     fichier for fichier in racine.rglob('*')
     if fichier.is_file() and fichier.parent.name in sample
 ]
+
+# parser les documents XML pour récupérer ceux qui ont une balise notebio
+
+xml_avec_notebio = []
+
+for chemin in chemins_xml_sans_affiliation:
+    tree = ET.parse(chemin)
+    article = tree.getroot()
+    notebios = article.findall("./partiesann/grnotebio/notebio/alinea")
+    print(notebios)
 
