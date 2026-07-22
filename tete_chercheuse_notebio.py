@@ -10,10 +10,18 @@ df = pd.read_csv('sample.csv', names=['idar'])
 sample = df['idar'].tolist()
 
 # créer le jeu de données pour stocker les informations
-affiliations_notesbio = pd.DataFrame(columns=["IDU de l'article", "IDau notebio", "Contenu notebio", "IDau auteur", "Prénom", "Nom de famille", "Nom complet", "IDU reconstitué"])
+affiliations_notesbio = pd.DataFrame(columns=[
+    "IDU de l'article",
+    "IDau notebio",
+    "Contenu notebio",
+    "IDau auteur",
+    "Prénom",
+    "Nom de famille",
+    "Nom complet",
+    "IDU affiliation reconstitué"])
 
 # ne considérer que les dossiers dont le nom se trouve dans la liste
-racine = Path("/home/adrien/Documents/erudit-affiliation-2025/xml_pour_notebio")
+racine = Path("/home/adrien/Documents/erudit-affiliation-2025/erudit_data")
 chemins_xml_sans_affiliation = [
     fichier for fichier in racine.rglob('*')
     if fichier.is_file() and fichier.parent.name in sample
@@ -25,6 +33,8 @@ xml_avec_notebio = []
 
 for chemin in chemins_xml_sans_affiliation:
     article = ET.parse(chemin).getroot()
-    for child in article.iter():
-        if child.attrib:
-            print(f"Tag: {child.tag} | Attributes: {child.attrib}") # imprime tous les éléments (n=2293)
+    notebios = article.findall(".//{http://www.erudit.org/xsd/article}notebio") # repère les notebio et les stocke dans une liste
+    for notebio in notebios:
+        if notebio is not None:
+            xml_avec_notebio.append(chemin)
+            
