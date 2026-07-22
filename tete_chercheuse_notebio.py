@@ -44,11 +44,14 @@ print(f"{len(xml_avec_notebio)} articles avec notices récupérés")
 # récupérer les informations depuis le document XML
 metadonnees_nb = {}
 
+x = 1
+
 for f in xml_avec_notebio:
     xml = ET.parse(f).getroot()
     for notebio in xml.findall(".//erudit:notebio", ns):
         # IDU article
-        metadonnees_nb["idar"] = xml.get('idproprio')
+        idar = xml.get('idproprio')
+        metadonnees_nb["idar"] = idar
         # ID auteur·ice
         nb_id = notebio.get('idrefs')
         metadonnees_nb["idref"] = nb_id
@@ -63,7 +66,14 @@ for f in xml_avec_notebio:
         # associer idref avec idauteur·ices
         autaires = xml.findall('.//erudit:auteur', ns)
         for autaire in autaires:
-            au_id = autaire.get('id')
-            print(au_id)
-        # if nb_id in xml.findall(erudit)
+            au_id = autaire.get('id') # fonctionne pour obtenir l'id auteur tel que représenté dans la balise auteur
+            if nb_id == au_id:
+                prenom = xml.find('.//erudit:prenom', ns).text
+                aut_nom = xml.find('.//erudit:autreprenom', ns)
+                if aut_nom:
+                    aut_nom = aut_nom.text
+                nomfam = xml.find('.//erudit:nomfamille', ns).text
+                metadonnees_nb.update({"idau": au_id, "prenom": prenom, "autreprenom": aut_nom, "nomfamille": nomfam})
+        print(metadonnees_nb)
+        print(f'Notice {idar}.{nb_id} complétée')
         # print(metadonnees_nb)
