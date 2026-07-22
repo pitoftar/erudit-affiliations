@@ -15,7 +15,7 @@ Cela ne signifie pas pour autant que ces auteur·ice·s n'ont pas d'affiliation 
 
 Ce dépôt se veut un bac à sable afin de raffiner ce processus d'attribution des affiliations et de le rendre à la fois plus exhaustif et plus performant.
 
-[^1]: On entend par une « instance-auteur·ice » que la plus petite unité répertoriée et non-dupliquée est l'affiliation. On examine d'abord les articles, puis les auteur·ice, et enfin, les affiliations. Un·e auteur·ice peut avoir plus d'une affiliation, et apparaîtra donc plusieurs fois. Si l'auteur·ice n'a aucune affiliation indiquée sur l'article, une ligne vide lui sera tout de même consacrée dans le document.
+[^1]: On entend par une « instance-auteur·ice » que la plus petite unité répertoriée et non-dupliquée est l'affiliation. On examine d'abord les articles, puis les auteur·ice, et enfin, les affiliations. Un·e auteur·ice peut avoir plus d'une affiliation, et apparaîtra donc plusieurs fois. Si l'auteur·ice n'a aucune affiliation indiquée sur l'article, une ligne vide lui sera tout de même consacrée dans le document. Cela signifie que chaque article peut apparaître plusieurs fois, et que chaque auteur·ice peut apparaître plusieurs fois (pour plusieurs affiliations pour un même article ou pour plusieurs articles). Chaque affiliation, telle qu'elle a été inscrite par l'auteur·ice sur un article donné, n'apparaît qu'une fois. Chacune est représentée par un identifiant unique, structuré comme suit : `no_article.no_auteur.nom_auteur.index_affiliation`.
 
 ## Pragmatique
 
@@ -31,4 +31,91 @@ En revanche, dans le troisième cas, il est relativement évident d'identifier l
 En raison de leur structure hétérogène et de l'absence de standardisation autour de la rédaction des notice biobibliographiques, il n'est pas possible d'associer des identifiants pérennes à celles-ci.
 Une fois la balise identifiée, une validation demeure nécessaire afin d'identifier l'affiliation actuelle de l'auteur·ice[^2].
 
-[^2]: Des grands modèles de langage pourraient être en mesure de prendre en charge cette classification et pourraient donc être envisagés pour cette tâche. 
+[^2]: Des grands modèles de langage pourraient être en mesure de prendre en charge cette classification et pourraient donc être envisagés pour cette tâche.
+
+### Nous avons
+
+- Un dump du contenu, balisé en XML, de tous les articles parus sur Érudit entre 2023 et 2025 (récupérable à partir de [https://redevance.erudit.org](https://redevance.erudit.org))
+- Une liste de toutes les [instances-auteur·ice](https://docs.google.com/spreadsheets/d/1zezZNg5HjF7R-d47UakkZSSYIgwduwd4/edit?gid=2144806381#gid=2144806381) (lien externe vers un Google Sheets privé) des articles parus en 2025
+- Une liste (dans un fichier csv) des ID articles uniques pour lesquels le champ `author_affiliation_content` est vide (n = 883)
+
+### Nous voulons
+
+- Une sortie minimalement structurée avec, sur chaque ligne/pour chaque objet
+	- l'IDU de l'article (`1100000ar`)
+	- le nom de l'auteur·ice concerné·e (`Simon van Bellen`)
+	- un concat de l'ID de l'auteur·ice concerné·e (`au1`) et de l'ID de l'article : `1100000ar.au1`
+	- le texte complet de la notice bibliographique associée
+	- une tentative de regénération de l'IDU dans `affiliations_standardisées_2025`
+
+### Nous devons
+
+1) Ne considérer que les documents XML dont l'attribut `idproprio` de la balise `<article>` est un match exact avec l'ID de l'un des articles pour lequel le champ `author_affiliation_content` est vide
+2) Parmi ces documents XML, ne retenir que ceux qui contiennent une balise `<notebio>`
+3) Récupérer le contenu des balises `<prenom>` et `<nomfamille>` dont l'attribut `id` de la balise parent `auteur` correspond à l'attribut `idrefs` de chaque balise `<notebio>`
+4) Récupérer le contenu textuel de la balise `<notebio>`
+5) Inscrire les informations dans un fichier csv ligne par ligne
+
+## Pratique
+
+### Pile logicielle
+
+- Python 3
+
+### Ingrédients
+
+- Module `xml.etree.ElementTree`
+    - 📄 [Documentation](https://docs.python.org/3/library/xml.etree.elementtree.html)
+    - ℹ️ [Information sur les différents parsers](https://realpython.com/python-xml-parser/#learn-about-xml-parsers-in-pythons-standard-library)
+- Librairie `pathlib`
+- Librairie `csv`
+- Librairie `pandas`
+
+### Étapes
+
+#### Préparer le dataframe
+
+- Inscrire la première ligne (voir [[#Inscrire les informations dans un fichier csv]])
+
+#### Identifier les XML d'articles sans affiliations
+
+- Stocker les IDU dans une liste
+- Vérifier si chaque titre de dossier correspond exactement à un élément qui se trouve dans la liste
+- Créer une liste des fichiers à examiner
+- Parser les fichiers
+- Créer une liste de fichiers qui comportent la balise `notebio`
+- Récupérer l'`idproprio` depuis le fichier et effectuer le reste des tâches
+
+#### Identifier les XML avec une notice biobiblio
+
+- Une fois le fichier XML de l'article chargé dans la mémoire, examiner le contenu afin de vérifier s'il contient au moins une balise `notebio`
+- Si oui, examiner chaque `notebio`
+- Sinon, passer au prochain
+
+#### Associer les notices biobiblio avec le nom des auteur-ices et récupérer le contenu de la notice biobiblio
+
+Pour chaque `notebio`
+
+- Identifier la valeur de la variable `idrefs` dans la balise `notebio` 
+- Stocker la variable dans un dictionnaire
+- Extraire le texte de la balise `alinea`
+- Stocker le texte dans un dictionnaire
+- Trouver la valeur de la variable `id` dans la balise `auteur` qui constitue un **match exact** avec `idrefs`
+- Stocker la valeur de la variable `id` de la balise `auteur` dans un dictionnaire
+	- 💡Une bonne pratique : garder l'`id` pour pour le nom des auteur-ices et garder l'`idrefs` pour le texte de la balise `notebio`
+- Extraire le texte balisé par `prenom` et `nomfamille` 
+- Stocker le nom dans un dictionnaire
+
+#### Inscrire les informations dans un fichier csv
+
+Pour chaque `notebio`
+
+- Inscrire les informations dans un dataframe ligne par ligne
+	- IDU de l'article
+	- IDU + Référence auteurice (notebio)
+	- Contenu notebio
+	- IDU + Référence auteurice (auteur)
+	- Prénom auteurice
+	- Nom famille auteurice
+	- Nom complet
+	- IDU + Référence auteurice (notebio) + nom complet + `.1`
