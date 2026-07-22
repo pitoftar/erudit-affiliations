@@ -36,5 +36,15 @@ for chemin in chemins_xml_sans_affiliation:
     article = ET.parse(chemin).getroot()
     notebios = article.findall(".//erudit:notebio", ns)
     for notebio in notebios:
-        if notebio is not None:
+        if notebio is not None and chemin not in xml_avec_notebio:
             xml_avec_notebio.append(chemin)
+
+print(f"{len(xml_avec_notebio)} articles avec notices récupérés")
+
+# récupérer les informations depuis le document XML
+metadonnees_ar = {}
+
+for f in xml_avec_notebio:
+    xml = ET.parse(f).getroot()
+    idar = xml.find('.//erudit:idproprio', ns) # possible origine du bug, élément idproprio retourne None. Peut-être une mauvaise formule pour trouver idproprio
+#    print(idar.attrib)
