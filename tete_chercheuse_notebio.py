@@ -50,8 +50,8 @@ for f in xml_avec_notebio:
         # IDU article
         metadonnees_nb["idar"] = xml.get('idproprio')
         # ID auteur·ice
-        au_id = notebio.get('idrefs')
-        metadonnees_nb["idref"] = au_id
+        nb_id = notebio.get('idrefs')
+        metadonnees_nb["idref"] = nb_id
         # texte de notebio
         # gestion des cas de notebio avec plusieurs paragraphes
         alinea = notebio.findall('.//erudit:alinea', ns)
@@ -60,4 +60,10 @@ for f in xml_avec_notebio:
             texte.append(a.text)
         txtnotebio = ' '.join(texte)
         metadonnees_nb["notebio"] = txtnotebio
-        print(metadonnees_nb)
+        # associer idref avec idauteur·ices
+        autaires = xml.findall('.//erudit:auteur', ns)
+        for autaire in autaires:
+            au_id = autaire.get('id')
+            print(au_id)
+        # if nb_id in xml.findall(erudit)
+        # print(metadonnees_nb)
