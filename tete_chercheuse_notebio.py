@@ -46,5 +46,5 @@ metadonnees_ar = {}
 
 for f in xml_avec_notebio:
     xml = ET.parse(f).getroot()
-    idar = xml.get('idproprio')
-    metadonnees_ar["idar"] = idar
+    metadonnees_ar["idar"] = xml.get('idproprio')
+    
