@@ -19,20 +19,22 @@ Ce dépôt se veut un bac à sable afin de raffiner ce processus d'attribution d
 
 ## Pragmatique
 
-Les deux premiers cas documentés dans le [préambule](https://github.com/pitoftar/erudit-affiliation-2025/tree/master#pr%C3%A9ambule) ne présentent pas de solution évidente.
+À prime abord, les deux premiers cas documentés dans le [préambule](https://github.com/pitoftar/erudit-affiliation-2025/tree/master#pr%C3%A9ambule) ne présentent pas de solution évidente.
 
 Dans la première situation, il n'y a d'autre choix que de vérifier un par un des PDFs des articles concernés.
 Un certain prétraitement pourrait être envisagé au niveau de la revue éventuellement, mais la validation manuelle semble, pour l'instant, incontournable.
 
-Dans la deuxième situation, un travail pourrait être envisagé pour que le script incorpore des cas limites ou fonctionne avec un intervale de confiance.
+Dans la deuxième situation, un travail pourrait être envisagé pour que le script incorpore des cas limites ou fonctionne avec un intervalle de confiance.
+On pourrait, par exemple, imaginer un premier tri où certaines affiliations seraient indiquées comme étant à valider, et d'autres seraient indiquées comme étant relativement fiables.
+Par exemple, un string présentant une correspondance exacte avec une institution non-ambiguë n'aurait pas besoin d'être validé, mais un cas comme « Ministère de la santé » ou « Hôpital Hôtel-Dieu » serait marqué comme devant être revu.
 Cependant, dans ce cas aussi, la validation manuelle semble difficilement évitable.
 
 En revanche, dans le troisième cas, il est relativement évident d'identifier la présence ou l'absence d'une balise `notebio` dans le XML.
 La balise peut ensuite être extraite en plein texte.
-En raison de leur structure hétérogène et de l'absence de standardisation autour de la rédaction des notice biobibliographiques, il n'est pas possible d'associer des identifiants pérennes à celles-ci.
+En raison de leur structure hétérogène et de l'absence de standardisation autour de la rédaction des notice biobibliographiques, il n'est pas possible d'associer des identifiants pérennes à celles-ci de manière automatique.
 Une fois la balise identifiée, une validation demeure nécessaire afin d'identifier l'affiliation actuelle de l'auteur·ice[^2].
 
-[^2]: Des grands modèles de langage pourraient être en mesure de prendre en charge cette classification et pourraient donc être envisagés pour cette tâche.
+[^2]: Des grands modèles de langage seraient potentiellement en mesure de prendre en charge cette classification et pourraient donc être envisagés pour cette tâche.
 
 ### Nous avons
 
