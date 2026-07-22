@@ -46,5 +46,5 @@ metadonnees_ar = {}
 
 for f in xml_avec_notebio:
     xml = ET.parse(f).getroot()
-    idar = xml.find('.//erudit:idproprio', ns) # possible origine du bug, élément idproprio retourne None. Peut-être une mauvaise formule pour trouver idproprio
-#    print(idar.attrib)
+    idar = xml.get('idproprio')
+    metadonnees_ar["idar"] = idar
