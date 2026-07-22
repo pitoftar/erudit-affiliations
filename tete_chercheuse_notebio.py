@@ -24,8 +24,7 @@ chemins_xml_sans_affiliation = [
 xml_avec_notebio = []
 
 for chemin in chemins_xml_sans_affiliation:
-    tree = ET.parse(chemin)
-    article = tree.getroot()
+    article = ET.parse(chemin).getroot()
     for child in article.iter():
         if child.attrib:
-            print(f"Tag: {child.tag} | Attributes: {child.attrib}")
+            print(f"Tag: {child.tag} | Attributes: {child.attrib}") # imprime tous les éléments (n=2293)
