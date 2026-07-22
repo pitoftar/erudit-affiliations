@@ -42,9 +42,11 @@ for chemin in chemins_xml_sans_affiliation:
 print(f"{len(xml_avec_notebio)} articles avec notices récupérés")
 
 # récupérer les informations depuis le document XML
-metadonnees_ar = {}
+metadonnees_nb = {}
 
 for f in xml_avec_notebio:
     xml = ET.parse(f).getroot()
-    metadonnees_ar["idar"] = xml.get('idproprio')
-    
+    for notebio in xml.findall(".//erudit:notebio", ns):
+        metadonnees_nb["idar"] = xml.get('idproprio')
+        au_id = notebio.get('idrefs')
+        metadonnees_nb["idref"] = au_id
