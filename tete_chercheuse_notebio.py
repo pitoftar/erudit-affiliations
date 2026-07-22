@@ -47,6 +47,17 @@ metadonnees_nb = {}
 for f in xml_avec_notebio:
     xml = ET.parse(f).getroot()
     for notebio in xml.findall(".//erudit:notebio", ns):
+        # IDU article
         metadonnees_nb["idar"] = xml.get('idproprio')
+        # ID auteur·ice
         au_id = notebio.get('idrefs')
         metadonnees_nb["idref"] = au_id
+        # texte de notebio
+        # gestion des cas de notebio avec plusieurs paragraphes
+        alinea = notebio.findall('.//erudit:alinea', ns)
+        texte = []
+        for a in alinea:
+            texte.append(a.text)
+        txtnotebio = ' '.join(texte)
+        metadonnees_nb["notebio"] = txtnotebio
+        print(metadonnees_nb)
