@@ -100,7 +100,7 @@ Pour chaque `notebio`
 
 - Identifier la valeur de la variable `idrefs` dans la balise `notebio` 
 - Stocker la variable dans un dictionnaire
-- Extraire le texte de la balise `alinea`
+- Extraire le texte de la (ou _des_, s'il y en a plusieurs) balise(s) `alinea`
 - Stocker le texte dans un dictionnaire
 - Trouver la valeur de la variable `id` dans la balise `auteur` qui constitue un **match exact** avec `idrefs`
 - Stocker la valeur de la variable `id` de la balise `auteur` dans un dictionnaire
