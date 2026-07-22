@@ -44,8 +44,6 @@ print(f"{len(xml_avec_notebio)} articles avec notices récupérés")
 # récupérer les informations depuis le document XML
 metadonnees_nb = {}
 
-x = 1
-
 for f in xml_avec_notebio:
     xml = ET.parse(f).getroot()
     for notebio in xml.findall(".//erudit:notebio", ns):
@@ -66,14 +64,14 @@ for f in xml_avec_notebio:
         # associer idref avec idauteur·ices
         autaires = xml.findall('.//erudit:auteur', ns)
         for autaire in autaires:
-            au_id = autaire.get('id') # fonctionne pour obtenir l'id auteur tel que représenté dans la balise auteur
+            au_id = autaire.get('id')
             if nb_id == au_id:
-                prenom = xml.find('.//erudit:prenom', ns).text
-                aut_nom = xml.find('.//erudit:autreprenom', ns)
+                prenom = xml.find(".//*[@id='%s']/prenom" % au_id, ns).text # je n'ai pas le bon chemin, mais le workaround pour la variable fonctionne
+                print(prenom)
+                aut_nom = xml.find('.//erudit:autreprenom', ns) # ne récupère que le tout premier nom
                 if aut_nom:
                     aut_nom = aut_nom.text
-                nomfam = xml.find('.//erudit:nomfamille', ns).text
+                nomfam = xml.find('.//erudit:nomfamille', ns).text # ne récupère que le tout premier nom
                 metadonnees_nb.update({"idau": au_id, "prenom": prenom, "autreprenom": aut_nom, "nomfamille": nomfam})
         print(metadonnees_nb)
         print(f'Notice {idar}.{nb_id} complétée')
-        # print(metadonnees_nb)
