@@ -38,7 +38,3 @@ for chemin in chemins_xml_sans_affiliation:
     for notebio in notebios:
         if notebio is not None:
             xml_avec_notebio.append(chemin)
-
-print(xml_avec_notebio)
-
-# récupérer 
