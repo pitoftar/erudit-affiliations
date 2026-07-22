@@ -28,13 +28,17 @@ chemins_xml_sans_affiliation = [
 ]
 
 # parser les documents XML pour récupérer ceux qui ont une balise notebio
-
 xml_avec_notebio = []
+
+ns = {'erudit': 'http://www.erudit.org/xsd/article'} # dictionnaire pour résoudre le namespace XML
 
 for chemin in chemins_xml_sans_affiliation:
     article = ET.parse(chemin).getroot()
-    notebios = article.findall(".//{http://www.erudit.org/xsd/article}notebio") # repère les notebio et les stocke dans une liste
+    notebios = article.findall(".//erudit:notebio", ns)
     for notebio in notebios:
         if notebio is not None:
             xml_avec_notebio.append(chemin)
-            
+
+print(xml_avec_notebio)
+
+# récupérer 
