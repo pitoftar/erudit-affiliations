@@ -66,7 +66,7 @@ for f in xml_avec_notebio:
         for autaire in autaires:
             au_id = autaire.get('id')
             if nb_id == au_id:
-                prenom = xml.find(".//*[@id='%s']//erudit:prenom" % au_id, ns).text # je n'ai pas le bon chemin, mais le workaround pour la variable fonctionne
+                prenom = xml.find(".//*[@id='%s']//erudit:prenom" % au_id, ns).text
                 aut_nom = xml.find('.//erudit:autreprenom', ns) # ne récupère que le tout premier nom
                 if aut_nom:
                     aut_nom = aut_nom.text
