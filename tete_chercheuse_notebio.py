@@ -3,6 +3,7 @@ from pathlib import Path
 import pandas as pd
 import xml.etree.ElementTree as ET
 import csv
+from datetime import datetime
 
 # stocker les id des articles dans une liste
 # /!\ remplacer 'sample.csv' par la liste complète
@@ -22,7 +23,8 @@ def recuperer_xml_notebio(racine, articles):
     La variable "racine" passée à la fonction correspond au chemin de
     l'emplacement des dossiers à trier.
     La variable "articles" correspond à la liste d'ID uniques des articles
-    sans affiliation candidats à l'extraction du contenu des balises notebio."""
+    sans affiliation candidats à l'extraction du contenu des balises notebio.
+    """
 
     chemins_xml_sans_affiliation = [
         fichier for fichier in racine.rglob('*')
@@ -46,7 +48,8 @@ def texte_notebio(notice):
     pour les regrouper dans un seul paragraphe suivi.
     
     La variable "notice" passée à la fonction correspond à l'élément XML
-    contenant potentiellement plusieurs balises "alinea"."""
+    contenant potentiellement plusieurs balises "alinea".
+    """
 
     alinea = notice.findall(".//erudit:alinea", ns)
 
@@ -63,7 +66,8 @@ def metadonnees_au(xml, idau):
     La variable "xml" passée à la fonction correspond à l'arborescence
     d'un document XML à examiner.
     La variable "idau" correspond à l'identifiant unique, extrait de la
-    balise "idrefs" ou du contenu de l'attribut "id" de la balise "auteur"."""
+    balise "idrefs" ou du contenu de l'attribut "id" de la balise "auteur".
+    """
 
     prenom = xml.find(".//*[@id='%s']//erudit:prenom" % idau, ns).text
 
@@ -81,63 +85,45 @@ def metadonnees_au(xml, idau):
         "nomcomplet": f"{prenom} {nomfam}".strip(),
     }
 
+def metadonnees_completes(xml, notice, idar):
+    """Retourne un dictionnaire avec les métadonnées complètes
+    pour chaque balise "notebio".
+    
+    La variable "xml" passée à la fonction correspond à l'arborescence
+    complète d'un document XML à examiner.
+    La variable "notice" correspond à une balise "notebio" trouvée dans
+    l'arborescence XML.
+    La variable "idar" correspond à l'identifiant unique de l'article tel
+    qu'identifié par la valeur de l'attribut "idproprio" de la balise
+    englobante "article".
+    """
 
+    nb_id = notice.get('idrefs')
+    notebio = texte_notebio(notice)
+    autaire = metadonnees_au(xml, nb_id)
+    nomcomplet = autaire.get("nomcomplet")
 
-# trouver textes notebio et metadonnées auteur
-for chemin in xml_avec_notebio:
-    xml = ET.parse(chemin).getroot()
+    return {
+        "idar": idar,
+        "idref": nb_id,
+        "notebio": notebio,
+        "idu_nb": f"{idar}.{nb_id}.{nomcomplet}.1",
+        **autaire,
+    }
 
-    for nb in xml.findall(".//erudit:notebio", ns):
-        nb_id = nb.get('idrefs')
-        notebio = texte_notebio(nb)
-        print(notebio)
+colonnes = ['idar', 'idref', 'notebio', 'idau', 'prenom', 'autreprenom', 'nomfamille', 'nomcomplet', 'idu_nb']
 
-        autaires = xml.findall('.//erudit:auteur', ns)
+maintenant = datetime.now().strftime("%Y%m%d-%H%M%S")
 
-        for autaire in autaires:
-            au_id = autaire.get('id')
-            if nb_id == au_id:
-                metadonnees = metadonnees_au(xml, au_id)
-                print(metadonnees)
+with open(f'out/{maintenant}_resultats.csv', 'w', newline='') as r:
+    scribe = csv.DictWriter(r, fieldnames=colonnes)
+    scribe.writeheader()
 
-# # récupérer les informations depuis le document XML
-# metadonnees_nb = {}
+    for chemin in xml_avec_notebio:
+        xml = ET.parse(chemin).getroot()
+        idar = xml.get('idproprio')
 
-# with open('resultats.csv', 'w', newline='') as r:
-#     colonnes = ['idar', 'idref', 'notebio', 'idau', 'prenom', 'autreprenom', 'nomfamille', 'nom_full', 'idu_nb']
-#     scribe = csv.DictWriter(r, fieldnames=colonnes)
-#     scribe.writeheader()          
-#     for f in xml_avec_notebio:
-#         xml = ET.parse(f).getroot()
-#         for notebio in xml.findall(".//erudit:notebio", ns):
-#             # IDU article
-#             idar = xml.get('idproprio')
-#             metadonnees_nb["idar"] = idar
-#             # ID auteur·ice
-#             nb_id = notebio.get('idrefs')
-#             metadonnees_nb["idref"] = nb_id
-#             # texte de notebio
-#             # gestion des cas de notebio avec plusieurs paragraphes
-#             alinea = notebio.findall('.//erudit:alinea', ns)
-#             texte = []
-#             for a in alinea:
-#                 texte.append(a.text)
-#             txtnotebio = ' '.join(texte)
-#             metadonnees_nb["notebio"] = txtnotebio
-#             # associer idref avec idauteur·ices
-#             autaires = xml.findall('.//erudit:auteur', ns)
-#             for autaire in autaires:
-#                 au_id = autaire.get('id')
-#                 if nb_id == au_id:
-#                     prenom = xml.find(".//*[@id='%s']//erudit:prenom" % au_id, ns).text
-#                     aut_nom = xml.find('.//erudit:autreprenom', ns)
-#                     if aut_nom:
-#                         aut_nom = aut_nom.text
-#                     nomfam = xml.find(".//*[@id='%s']//erudit:nomfamille" % au_id, ns).text
-#                     metadonnees_nb.update({"idau": au_id, "prenom": prenom, "autreprenom": aut_nom, "nomfamille": nomfam})
-#             nomcomplet = prenom + ' ' + nomfam
-#             metadonnees_nb["nom_full"] = nomcomplet
-#             idu_nb = '.'.join([idar, nb_id, nomcomplet]) + '.1'
-#             metadonnees_nb["idu_nb"] = idu_nb
-#             scribe.writerow(metadonnees_nb)
-#             print(f'Notice {idar}.{nb_id} complétée')
+        for notebio in xml.findall('.//erudit:notebio', ns):
+            metadonnees = metadonnees_completes(xml, notebio, idar)
+            scribe.writerow(metadonnees)
+            print(f'Notice {idar}.{metadonnees['idref']} complétée')
