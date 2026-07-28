@@ -7,7 +7,7 @@ from datetime import datetime
 
 # stocker les id des articles dans une liste
 # /!\ remplacer 'sample.csv' par la liste complète
-df = pd.read_csv('sample.csv', names=['idar'])
+df = pd.read_csv('articles_affiliations_vides.csv', names=['idar'])
 articles = df['idar'].tolist()
 
 # ne considérer que les dossiers dont le nom se trouve dans la liste
@@ -69,19 +69,23 @@ def metadonnees_au(xml, idau):
     balise "idrefs" ou du contenu de l'attribut "id" de la balise "auteur".
     """
 
-    prenom = xml.find(".//*[@id='%s']//erudit:prenom" % idau, ns).text
+    prenom = xml.find(".//*[@id='%s']/nompers/erudit:prenom" % idau, ns)
+    if prenom is not None:
+        prenom = prenom.text
 
-    aut_nom = xml.find('.//erudit:autreprenom', ns)
-    if aut_nom:
+    aut_nom = xml.find('./nompers/erudit:autreprenom', ns)
+    if aut_nom is not None:
         aut_nom = aut_nom.text
 
-    nomfam = xml.find(".//*[@id='%s']//erudit:nomfamille" % idau, ns).text
+    nomfam = xml.find(".//*[@id='%s']/nompers/erudit:nomfamille" % idau, ns)
+    if nomfam is not None:
+        nomfam = nomfam.text
 
     return {
         "idau": idau,
-        "prenom": prenom,
+        "prenom": prenom if prenom is not None else None,
         "autreprenom": aut_nom if aut_nom is not None else None,
-        "nomfamille": nomfam,
+        "nomfamille": nomfam if nomfam is not None else None,
         "nomcomplet": f"{prenom} {nomfam}".strip(),
     }
 
@@ -124,6 +128,7 @@ with open(f'out/{maintenant}_resultats.csv', 'w', newline='') as r:
         idar = xml.get('idproprio')
 
         for notebio in xml.findall('.//erudit:notebio', ns):
+            print(f'En train de travailler sur {idar}.')
             metadonnees = metadonnees_completes(xml, notebio, idar)
             scribe.writerow(metadonnees)
             print(f'Notice {idar}.{metadonnees['idref']} complétée')
