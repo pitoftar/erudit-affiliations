@@ -69,23 +69,23 @@ def metadonnees_au(xml, idau):
     balise "idrefs" ou du contenu de l'attribut "id" de la balise "auteur".
     """
 
-    prenom = xml.find(".//*[@id='%s']/nompers/erudit:prenom" % idau, ns)
+    prenom = xml.find(".//*[@id='%s']//erudit:prenom" % idau, ns)
     if prenom is not None:
         prenom = prenom.text
 
-    aut_nom = xml.find('./nompers/erudit:autreprenom', ns)
+    aut_nom = xml.find('.//erudit:autreprenom', ns)
     if aut_nom is not None:
         aut_nom = aut_nom.text
 
-    nomfam = xml.find(".//*[@id='%s']/nompers/erudit:nomfamille" % idau, ns)
+    nomfam = xml.find(".//*[@id='%s']//erudit:nomfamille" % idau, ns)
     if nomfam is not None:
         nomfam = nomfam.text
 
     return {
         "idau": idau,
-        "prenom": prenom if prenom is not None else None,
+        "prenom": prenom,
         "autreprenom": aut_nom if aut_nom is not None else None,
-        "nomfamille": nomfam if nomfam is not None else None,
+        "nomfamille": nomfam,
         "nomcomplet": f"{prenom} {nomfam}".strip(),
     }
 
