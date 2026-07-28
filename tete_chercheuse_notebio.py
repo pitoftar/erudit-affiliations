@@ -44,33 +44,41 @@ print(f"{len(xml_avec_notebio)} articles avec notices récupérés")
 # récupérer les informations depuis le document XML
 metadonnees_nb = {}
 
-for f in xml_avec_notebio:
-    xml = ET.parse(f).getroot()
-    for notebio in xml.findall(".//erudit:notebio", ns):
-        # IDU article
-        idar = xml.get('idproprio')
-        metadonnees_nb["idar"] = idar
-        # ID auteur·ice
-        nb_id = notebio.get('idrefs')
-        metadonnees_nb["idref"] = nb_id
-        # texte de notebio
-        # gestion des cas de notebio avec plusieurs paragraphes
-        alinea = notebio.findall('.//erudit:alinea', ns)
-        texte = []
-        for a in alinea:
-            texte.append(a.text)
-        txtnotebio = ' '.join(texte)
-        metadonnees_nb["notebio"] = txtnotebio
-        # associer idref avec idauteur·ices
-        autaires = xml.findall('.//erudit:auteur', ns)
-        for autaire in autaires:
-            au_id = autaire.get('id')
-            if nb_id == au_id:
-                prenom = xml.find(".//*[@id='%s']//erudit:prenom" % au_id, ns).text
-                aut_nom = xml.find('.//erudit:autreprenom', ns)
-                if aut_nom:
-                    aut_nom = aut_nom.text
-                nomfam = xml.find(".//*[@id='%s']//erudit:nomfamille" % au_id, ns).text
-                metadonnees_nb.update({"idau": au_id, "prenom": prenom, "autreprenom": aut_nom, "nomfamille": nomfam})
-        print(metadonnees_nb)
-        print(f'Notice {idar}.{nb_id} complétée')
+with open('resultats.csv', 'w', newline='') as r:
+    colonnes = ['idar', 'idref', 'notebio', 'idau', 'prenom', 'autreprenom', 'nomfamille', 'nom_full', 'idu_nb']
+    scribe = csv.DictWriter(r, fieldnames=colonnes)
+    scribe.writeheader()          
+    for f in xml_avec_notebio:
+        xml = ET.parse(f).getroot()
+        for notebio in xml.findall(".//erudit:notebio", ns):
+            # IDU article
+            idar = xml.get('idproprio')
+            metadonnees_nb["idar"] = idar
+            # ID auteur·ice
+            nb_id = notebio.get('idrefs')
+            metadonnees_nb["idref"] = nb_id
+            # texte de notebio
+            # gestion des cas de notebio avec plusieurs paragraphes
+            alinea = notebio.findall('.//erudit:alinea', ns)
+            texte = []
+            for a in alinea:
+                texte.append(a.text)
+            txtnotebio = ' '.join(texte)
+            metadonnees_nb["notebio"] = txtnotebio
+            # associer idref avec idauteur·ices
+            autaires = xml.findall('.//erudit:auteur', ns)
+            for autaire in autaires:
+                au_id = autaire.get('id')
+                if nb_id == au_id:
+                    prenom = xml.find(".//*[@id='%s']//erudit:prenom" % au_id, ns).text
+                    aut_nom = xml.find('.//erudit:autreprenom', ns)
+                    if aut_nom:
+                        aut_nom = aut_nom.text
+                    nomfam = xml.find(".//*[@id='%s']//erudit:nomfamille" % au_id, ns).text
+                    metadonnees_nb.update({"idau": au_id, "prenom": prenom, "autreprenom": aut_nom, "nomfamille": nomfam})
+            nomcomplet = prenom + ' ' + nomfam
+            metadonnees_nb["nom_full"] = nomcomplet
+            idu_nb = '.'.join([idar, nb_id, nomcomplet]) + '.1'
+            metadonnees_nb["idu_nb"] = idu_nb
+            scribe.writerow(metadonnees_nb)
+            print(f'Notice {idar}.{nb_id} complétée')
