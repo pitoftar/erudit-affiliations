@@ -56,8 +56,8 @@ def texte_notebio(notice):
     texte = []
 
     for a in alinea:
-        texte.append(a.text)
-    return ' '.join(texte)
+        texte.append("".join(a.itertext()))
+    return ' '.join(texte) # problème ici lorsqu'il y a d'autres balises à l'intérieur de <alinea>
 
 def metadonnees_au(xml, idau):
     """Retourne les métadonnées des auteur·ices d'un article
@@ -127,8 +127,9 @@ with open(f'out/{maintenant}_resultats.csv', 'w', newline='') as r:
         xml = ET.parse(chemin).getroot()
         idar = xml.get('idproprio')
 
+        print(f'En train de lire {idar}.')
+
         for notebio in xml.findall('.//erudit:notebio', ns):
-            print(f'En train de travailler sur {idar}.')
             metadonnees = metadonnees_completes(xml, notebio, idar)
             scribe.writerow(metadonnees)
             print(f'Notice {idar}.{metadonnees['idref']} complétée')
