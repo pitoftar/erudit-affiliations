@@ -67,10 +67,10 @@ for f in xml_avec_notebio:
             au_id = autaire.get('id')
             if nb_id == au_id:
                 prenom = xml.find(".//*[@id='%s']//erudit:prenom" % au_id, ns).text
-                aut_nom = xml.find('.//erudit:autreprenom', ns) # ne récupère que le tout premier nom
+                aut_nom = xml.find('.//erudit:autreprenom', ns)
                 if aut_nom:
                     aut_nom = aut_nom.text
-                nomfam = xml.find('.//erudit:nomfamille', ns).text # ne récupère que le tout premier nom
+                nomfam = xml.find(".//*[@id='%s']//erudit:nomfamille" % au_id, ns).text
                 metadonnees_nb.update({"idau": au_id, "prenom": prenom, "autreprenom": aut_nom, "nomfamille": nomfam})
         print(metadonnees_nb)
         print(f'Notice {idar}.{nb_id} complétée')
