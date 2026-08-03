@@ -75,44 +75,54 @@ Une fois la balise identifiée, une validation demeure nécessaire afin d'identi
 
 ### Étapes
 
-#### Préparer le dataframe
-
-- Inscrire la première ligne (voir [Inscrire les informations dans un fichier csv](https://github.com/pitoftar/erudit-affiliation-2025/tree/master#inscrire-les-informations-dans-un-fichier-csv))
-
 #### Identifier les XML d'articles sans affiliations
+
+Fonction `recuperer_xml_notebio()`
 
 - Stocker les IDU dans une liste
 - Vérifier si chaque titre de dossier correspond exactement à un élément qui se trouve dans la liste
 - Créer une liste des fichiers à examiner
 - Parser les fichiers
 - Créer une liste de fichiers qui comportent la balise `notebio`
-- Récupérer l'`idproprio` depuis le fichier
+- Ajouter le chemin vers ce fichier dans une liste
 
-#### Identifier les XML avec une notice biobiblio
+### Récupérer le texte des notices
 
-- Une fois le fichier XML de l'article chargé dans la mémoire, examiner le contenu afin de vérifier s'il contient au moins une balise `notebio`
-- Si oui, examiner chaque `notebio`
-- Sinon, passer au prochain
+Fonction `texte_notebio()`
 
-#### Associer les notices biobiblio avec le nom des auteur-ices et récupérer le contenu de la notice biobiblio
+- Parcourir chacune des notices
+- Extraire le texte en tenant compte du fait
+	- qu'une même notice peut avoir plusieurs paragraphes
+	- que tout le texte n'est pas nécessairement l'enfant direct de la balise `alinea`, puisqu'elle contient parfois d'autres balises (p. ex. `marquage`) qui peuvent elles-mêmes contenir du texte
+
+#### Extraire le nom des auteur·ice à partir de leur index dans l'article
+
+Fonction `metadonnees_au()`
 
 Pour chaque `notebio`
 
-- Identifier la valeur de la variable `idrefs` dans la balise `notebio` 
-- Stocker la variable dans un dictionnaire
-- Extraire le texte de la (ou _des_, s'il y en a plusieurs) balise(s) `alinea`
-- Stocker le texte dans un dictionnaire
+- Identifier la valeur de la variable `idrefs` dans la balise `notebio`
+- Passer la valeur de la variable `idrefs` à la fonction
 - Trouver la valeur de la variable `id` dans la balise `auteur` qui constitue un **match exact** avec `idrefs`
-- Stocker la valeur de la variable `id` de la balise `auteur` dans un dictionnaire
-	- 💡Une bonne pratique : garder l'`id` pour pour le nom des auteur-ices et garder l'`idrefs` pour le texte de la balise `notebio`
-- Extraire le texte balisé par `prenom` et `nomfamille` 
-- Stocker le nom dans un dictionnaire
+- Extraire le texte balisé par `prenom`, `autreprenom` et `nomfamille`
+	- 📝 N.B.: Même si le contenu de la balise `autreprenom` n'est généralement pas identifiée dans le document d'attribution, j'ai choisi de l'inclure puisqu'il peut faciliter la recherche d'individus dont il faut valider manuellement l'affiliation
+- Stocker le texte dans un dictionnaire si ces variables sont présentes
+
+#### Extraire les métadonnées complètes pour chaque document XML
+
+Fonction `metadonnees_completes()`
+
+- Extraire l'identifiant unique de chaque article à partir de l'attribut `idproprio`
+- Pour chaque notebio, extraire le contenu de la balise `idrefs`
+- Pour chaque notebio, extraire le contenu textuel
+- Pour chaque notebio, extraire les métadonnées de l'auteur·ice
+- Stocker les informations dans un dictionnaire
 
 #### Inscrire les informations dans un fichier csv
 
 Pour chaque `notebio`
 
-- Inscrire les informations dans un dataframe ligne par ligne
+- Inscrire les informations dans un fichier csv, ligne par ligne
 	- IDU de l'article
 	- IDU + Référence auteurice (notebio)
 	- Contenu notebio
@@ -121,3 +131,9 @@ Pour chaque `notebio`
 	- Nom famille auteurice
 	- Nom complet
 	- IDU + Référence auteurice (notebio) + nom complet + `.1`
+
+## Quelques problèmes connus
+
+- Certains articles ne retournent ni valeur pour la balise `idrefs` ni prénom, ni nom de famille. Ces deux dernières informations sont pourtant présentes dans les fichiers XML. C'est par exemple le cas de l'article [1118513ar](https://www.erudit.org/fr/revues/archivaria/2025-n99-archivaria010099/1118513ar.xml), seulement pour la cinquième autrice (Karen Suurtamm) ou de l'article [1117727ar](https://www.erudit.org/fr/revues/possibles/2025-v49-n1-possibles010004/1117727ar.xml). Le problème semble être lié à l'absence d'une balise `idrefs` dans `notebio` : ces dernières sont alors seulement identifiées par une balise `id`. Il faudrait trouver un moyen de contourner le problème en extrayant aussi les prénoms et noms de famille même si la balise `idrefs` est absente.
+- Certains articles formulent des notices communes pour tous·tes leurs auteur·ices. C'est par exemple le cas de [1121908ar](https://www.erudit.org/fr/revues/jssac/2024-v49-n2-jssac010441/1121908ar.xml). Dans ce cas, l'identifiant unique reconstitué (p. ex. `1121908ar.au1 au2 au3 au4 au5.None None.1`) ne correspond pas à celui extrait dans le document d'attribution (p. ex. `1121908ar.au1.Michael Windover.1`). Cette différence s'explique puisque le présent script se base d'abord sur l'`idref` de la notice pour construire l'identifiant unique, alors que le premier script se base (je suppose) sur la valeur de l'attribut `id` de la balise `auteur`.
+- À [au moins une occasion](https://www.erudit.org/fr/revues/memoires/2025-v16-n2-memoires010471/1122239ar.xml), deux co-auteur·ices ont vu leurs notices biobibliographiques être inversées dans l'extraction. Cela s'explique puisque les balises `notebio` faisaient référence au mauvais index comparativement à la balise `auteur`. Les coquilles de ce genre devront probablement être signalées à et corrigées par l'équipe de prod.

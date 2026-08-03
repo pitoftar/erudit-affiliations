@@ -57,7 +57,7 @@ def texte_notebio(notice):
 
     for a in alinea:
         texte.append("".join(a.itertext()))
-    return ' '.join(texte) # problème ici lorsqu'il y a d'autres balises à l'intérieur de <alinea>
+    return ' '.join(texte)
 
 def metadonnees_au(xml, idau):
     """Retourne les métadonnées des auteur·ices d'un article
@@ -66,7 +66,7 @@ def metadonnees_au(xml, idau):
     La variable "xml" passée à la fonction correspond à l'arborescence
     d'un document XML à examiner.
     La variable "idau" correspond à l'identifiant unique, extrait de la
-    balise "idrefs" ou du contenu de l'attribut "id" de la balise "auteur".
+    balise "idrefs" dans "notebio".
     """
 
     prenom = xml.find(".//*[@id='%s']//erudit:prenom" % idau, ns)
