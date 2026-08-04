@@ -7,7 +7,7 @@ Puisque les revues n'encodent pas elles-mêmes ces affiliations, la tâche de le
 Ces associations fonctionnent sur une logique de _string-matching_ et récupèrent, si possible, un identifiant ROR à partir de l'affiliation en plein texte.
 En raison de nombreux problèmes de désambiguisation, chacune de ces affiliations doit être validée manuellement.
 
-Sur les ~9700 instance-auteur·ice[^1] extraites depuis la plateforme pour 2025, on dénombre près de 2000 cas où aucun identifiant pérenne ROR n'a été récupéré, entre autres parce qu'aucun string pour identifier l'affiliation n'a été produit lors de l'extraction.
+Sur les ~9700 instances-auteur·ice[^1] extraites depuis la plateforme pour 2025, on dénombre près de 2000 cas où aucun identifiant pérenne ROR n'a été récupéré, entre autres parce qu'aucun string pour identifier l'affiliation n'a été produit lors de l'extraction.
 Cela ne signifie pas pour autant que ces auteur·ice·s n'ont pas d'affiliation : il se pourrait que
 1) celles-ci se trouvent dans le PDF et n'aient pas été balisées;
 2) celles-ci ont été extraites, mais le script n'a repéré aucun match dans le dictionnaire des institutions ROR;
