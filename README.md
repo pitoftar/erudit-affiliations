@@ -125,10 +125,11 @@ Pour chaque `notebio`
 
 - Inscrire les informations dans un fichier csv, ligne par ligne
 	- IDU de l'article
-	- IDU + Référence auteurice (notebio)
+	- IDU + Référence auteurice (balise `notebio`)
 	- Contenu notebio
-	- IDU + Référence auteurice (auteur)
+	- IDU + Référence auteurice (balise `auteur`)
 	- Prénom auteurice
+	- Autre prénom auteurice
 	- Nom famille auteurice
 	- Nom complet
 	- IDU + Référence auteurice (notebio) + nom complet + `.1`
