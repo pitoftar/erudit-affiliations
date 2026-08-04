@@ -25,6 +25,7 @@ Dans la première situation, il n'y a d'autre choix que de vérifier un par un d
 Un certain prétraitement pourrait être envisagé au niveau de la revue éventuellement, mais la validation manuelle semble, pour l'instant, incontournable.
 
 Dans la deuxième situation, un travail pourrait être envisagé pour que le script incorpore des cas limites ou fonctionne avec un intervalle de confiance.
+Ainsi, la mesure de rappel de l'algorithme pourrait être meilleure, mais il perdrait en précision.
 On pourrait, par exemple, imaginer un premier tri où certaines affiliations seraient indiquées comme étant à valider, et d'autres seraient indiquées comme étant relativement fiables.
 Par exemple, un string présentant une correspondance exacte avec une institution non-ambiguë n'aurait pas besoin d'être validé, mais un cas comme « Ministère de la santé » ou « Hôpital Hôtel-Dieu » serait marqué comme devant être revu.
 Cependant, dans ce cas aussi, la validation manuelle semble difficilement évitable.
